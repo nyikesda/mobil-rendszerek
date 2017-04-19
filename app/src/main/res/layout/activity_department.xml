@@ -1,9 +1,104 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_department"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="hu.bme.mobil_rendszerek.ui.deparment.DepartmentActivity">
+    android:fitsSystemWindows="true"
+    android:theme="@style/AppTheme"
+    tools:context=".ui.department.DepartmentActivity">
 
-</android.support.constraint.ConstraintLayout>
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <android.support.v7.widget.Toolbar
+                app:title="@string/department_title"
+                android:id="@+id/toolbar"
+                android:layout_width="wrap_content"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary"
+                app:popupTheme="@style/AppTheme.PopupOverlay" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <Button
+                android:id="@+id/logout"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="@drawable/ic_exit_to_app_black_48dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginRight="10dp"/>
+        </LinearLayout>
+
+
+    </android.support.design.widget.AppBarLayout>
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:layout_marginTop="40dp"
+        tools:context=".ui.department.DepartmentActivity">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <EditText
+                    android:id="@+id/departmentName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/department_name" />
+
+                <EditText
+                    android:id="@+id/monthlyQuota"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/monthly_quota"
+                    android:inputType="number"/>
+
+                <TextView
+                    android:text="Beszerzők"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <hu.bme.mobil_rendszerek.ui.department.MultiSpinner
+                    android:id="@+id/people_select"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"/>
+
+                <Button
+                    android:id="@+id/btnSave"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/new_department" />
+
+            </LinearLayout>
+        </ScrollView>
+    </RelativeLayout>
+
+</android.support.design.widget.CoordinatorLayout>
+
+

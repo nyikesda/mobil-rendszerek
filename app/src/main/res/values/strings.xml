@@ -1,3 +1,34 @@
 <resources>
     <string name="app_name">mobil-rendszerek</string>
+    <string name="orderItemName">Termék</string>
+    <string name="order_title">Költségek</string>
+    <string name="add_new_order">Új költség felvétele</string>
+    <string name="orderCount">Darab</string>
+    <string name="orderDate">Dátum</string>
+    <string name="orderCost">Ár</string>
+    <string name="save_new_order">Felvétel</string>
+    <string name="product_name">Termék neve</string>
+    <string name="product_cost">Termék ára</string>
+    <string name="product_count">Darab</string>
+    <string name="cancelled_create_order">Megszakított felvétel</string>
+    <string name="user_name">Felhasználó név</string>
+    <string name="password">Jelszó</string>
+    <string name="login">Belépés</string>
+    <string name="department_name">Részleg neve</string>
+    <string name="monthly_quota">Havi kvóta</string>
+    <string name="new_department">Új részleg</string>
+    <string name="department_title">Részleg hozzáadása</string>
+    <string name="offline_mode_text">Önnek nincs offline üzemmód</string>
+    <string name="non_administrator_or_purveyor">Nem adminisztrátor vagy beszerző</string>
+    <string name="validation_required_product_name">Termék neve kötelező</string>
+    <string name="validation_required_price">Ár kötelező</string>
+    <string name="validation_required_product_count">Darabszám kötelező</string>
+    <string name="offline_have_to_refresh">Offline nem elérhető ez a funkció, frissítsen</string>
+    <string name="validation_required_department_name">Részleg neve kötelező</string>
+    <string name="validation_required_department_monthly_quota">Havi kvóta kötelező</string>
+    <string name="validation_required_department_worker">Muszáj legalább egy beszerzőt kiválasztani</string>
+    <string name="success_save">Sikeres mentés</string>
+    <string name="spinner_elem_count_text">elem van kiválasztva</string>
+    <string name="login_offline_failed">Nincs elmentve ilyen belépése</string>
+    <string name="empty_list_purveyor">Nincs kijelölhető beszerző</string>
 </resources>

@@ -1,5 +1,6 @@
 package hu.bme.mobil_rendszerek.ui.main;
 
+import hu.bme.mobil_rendszerek.model.Credential;
 import hu.bme.mobil_rendszerek.model.User;
 
 /**
@@ -7,6 +8,7 @@ import hu.bme.mobil_rendszerek.model.User;
  */
 
 public interface MainScreen {
-    void showNetworkError(String text);
-    void showOptionsDependsOnPrivilege(User user);
+    void showNetworkInformation(String text);
+    void offlineStart(Credential credential);
+    void showNextActivityDependsOnPrivilege(User user, Credential credential);
 }

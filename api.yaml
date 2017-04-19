@@ -1,0 +1,152 @@
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: Cost report system
+  basePath: /api
+paths:
+  /OrderItems:
+    post:
+      operationId: OrderItem_create
+      parameters:
+        - name: data
+          in: body
+          required: false
+          schema:
+            $ref: '#/definitions/OrderItem'
+        - name: credential
+          in: query
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Request was successful
+        '409':
+          description: The request could not be completed due to a conflict with the current state of the resource.
+        '401':
+          description: Unauthorized
+    get:
+      operationId: OrderItem_findByDepartmentId
+      parameters:
+        - name: credential
+          in: query
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Request was successful
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/OrderItem'
+        '404':
+          description: No order items to the department
+        '401':
+          description: Unauthorized
+  /Departments:
+    post:
+      operationId: Department_create
+      parameters:
+        - name: userIds
+          in: query
+          required: true
+          type: array
+          items:
+            type: integer
+        - name: data
+          in: body
+          required: false
+          schema:
+            $ref: '#/definitions/Department'
+        - name: credential
+          in: query
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Request was successful
+        '409':
+          description: The request could not be completed due to a conflict with the current state of the resource.
+        '401':
+          description: Unauthorized
+  /Users:
+    get:
+      operationId: Users_findByDepartmentId
+      parameters:
+        - name: credential
+          in: query
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Request was successful
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        '401':
+          description: Unauthorized
+  /Login:
+    post:
+      operationId: login
+      parameters:
+        - name: credentials
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Credential'
+      responses:
+        '200':
+          description: Request was successful
+          schema:
+            $ref: '#/definitions/User'
+        '401':
+          description: Unauthorized
+definitions:
+  Credential:
+    properties:
+      username:
+        type: string
+      password:
+        type: string
+  OrderItem:
+    properties:
+      date:
+        type: string
+        format: date
+      cost:
+        type: integer
+      count:
+        type: integer
+      productName:
+        type: string
+      orderItemId:
+        type: integer
+      departmentId:
+        type: integer
+    additionalProperties: false
+  Department:
+    properties:
+      name:
+        type: string
+      monthlyQuota:
+        type: integer
+      departmentId:
+        type: integer
+    additionalProperties: false
+  User:
+    properties:
+      username:
+        type: string
+      privilege:
+        type: integer
+      lastName:
+        type: string
+      firstName:
+        type: string
+      departmentId:
+        type: integer
+      userId:
+        type: integer
+      credential:
+        type: string
+    additionalProperties: false

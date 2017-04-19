@@ -1,62 +1,142 @@
 package hu.bme.mobil_rendszerek.ui.main;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.EditText;
+import android.widget.RelativeLayout;
 
 import javax.inject.Inject;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import hu.bme.mobil_rendszerek.MobSoftApplication;
 import hu.bme.mobil_rendszerek.R;
-import hu.bme.mobil_rendszerek.model.Privilege;
+import hu.bme.mobil_rendszerek.model.Credential;
 import hu.bme.mobil_rendszerek.model.User;
-import hu.bme.mobil_rendszerek.ui.deparment.DepartmentActivity;
+import hu.bme.mobil_rendszerek.network.Privilege;
+import hu.bme.mobil_rendszerek.ui.department.DepartmentActivity;
 import hu.bme.mobil_rendszerek.ui.order.OrderActivity;
 
-public class MainActivity extends AppCompatActivity  implements MainScreen {
+public class MainActivity extends AppCompatActivity implements MainScreen {
+    public static final String KEY_LOGOUT = "KEY_LOGOUT";
+    public static final String KEY_DEPARTMENTID = "departmentID";
+    public static final String KEY_USERNAME = "username";
+    public static final String KEY_PASSWORD = "password";
+    public static final String KEY_PRIVILEGE = "privilege";
+    public static final String KEY_LASTNAME = "lastName";
+    public static final String KEY_FIRSTNAME = "firstName";
 
     @Inject
     MainPresenter mainPresenter;
+    @BindView(R.id.username)
+    EditText username;
+    @BindView(R.id.password)
+    EditText password;
+    RelativeLayout main;
+    SharedPreferences sharedPref;
+    Credential credential;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        main = (RelativeLayout) findViewById(R.id.activity_main);
+        ButterKnife.bind(this);
         MobSoftApplication.injector.inject(this);
+        sharedPref = getSharedPreferences("userdetails", Context.MODE_PRIVATE);
+    }
 
-        //TODO Login fields and button and call
-        //mainPresenter.login(userName, password);
+    @OnClick(R.id.login)
+    void login() {
+        if (username.getText().toString().equals("") && credential != null) {
+            mainPresenter.login(credential.getUsername(), credential.getPassword());
+        } else {
+            mainPresenter.login(username.getText().toString(), password.getText().toString());
+        }
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
+    protected void onResume() {
+        super.onResume();
         mainPresenter.attachScreen(this);
+        if (getIntent().getExtras() != null && getIntent().getExtras().getBoolean(KEY_LOGOUT)) {
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.clear();
+            editor.commit();
+            getIntent().removeExtra(KEY_LOGOUT);
+        } else {
+            String userName = sharedPref.getString(KEY_USERNAME, null);
+            String password = sharedPref.getString(KEY_PASSWORD, null);
+            if (userName != null && password != null) {
+                credential = new Credential();
+                credential.setUsername(userName);
+                credential.setPassword(password);
+                login();
+            }
+        }
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onPause() {
+        super.onPause();
         mainPresenter.detachScreen();
     }
 
 
     @Override
-    public void showNetworkError(String text) {
-        //TODO
+    public void showNetworkInformation(String text) {
+        Snackbar.make(main, text, Snackbar.LENGTH_LONG).show();
     }
 
     @Override
-    public void showOptionsDependsOnPrivilege(User user) {
-        if (user.getPrivilege() == Privilege.administrator) {
+    public void offlineStart(Credential credential) {
+        Integer privilege = sharedPref.getInt(KEY_PRIVILEGE, -1);
+        if (credential.getUsername().equals(this.credential.getUsername()) &&
+                credential.getPassword().equals(this.credential.getPassword())) {
+            User user = new User();
+            user.setPrivilege(privilege);
+            user.setDepartmentId(sharedPref.getInt(KEY_DEPARTMENTID, -1));
+            user.setFirstName(sharedPref.getString(KEY_FIRSTNAME, null));
+            user.setLastName(sharedPref.getString(KEY_LASTNAME, null));
+            showNextActivityDependsOnPrivilege(user, credential);
+        } else {
+            showNetworkInformation(getString(R.string.login_offline_failed));
+        }
+
+    }
+
+    @Override
+    public void showNextActivityDependsOnPrivilege(User user, Credential credential) {
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(KEY_USERNAME, credential.getUsername());
+        editor.putString(KEY_PASSWORD, credential.getPassword());
+        editor.putInt(KEY_PRIVILEGE, user.getPrivilege());
+        if (user.getDepartmentId() != null)
+            editor.putInt(KEY_DEPARTMENTID, user.getDepartmentId());
+        editor.putString(KEY_LASTNAME, user.getLastName());
+        editor.putString(KEY_FIRSTNAME, user.getFirstName());
+        editor.commit();
+        if (user.getUserId() == null && user.getPrivilege() == Privilege.administrator.getValue()) {
+            showNetworkInformation(getString(R.string.offline_mode_text));
+            return;
+        }
+
+        if (user.getPrivilege() == Privilege.administrator.getValue()) {
             Intent intent = new Intent(MainActivity.this, DepartmentActivity.class);
-            //intent.putExtra(KEY_ARTIST,artistSearchTerm);
+            intent.putExtra(OrderActivity.KEY_USER, user);
             startActivity(intent);
-        } else if (user.getPrivilege() == Privilege.purveyor){
+        } else if (user.getPrivilege() == Privilege.purveyor.getValue()) {
             Intent intent = new Intent(MainActivity.this, OrderActivity.class);
-            //intent.putExtra(KEY_ARTIST,artistSearchTerm);
+            intent.putExtra(OrderActivity.KEY_USER, user);
             startActivity(intent);
+        } else {
+            showNetworkInformation(getString(R.string.non_administrator_or_purveyor));
         }
     }
 }

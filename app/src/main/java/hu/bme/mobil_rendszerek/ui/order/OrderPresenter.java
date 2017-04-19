@@ -1,7 +1,20 @@
 package hu.bme.mobil_rendszerek.ui.order;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
+import java.util.concurrent.Executor;
+
+import javax.inject.Inject;
+
+import hu.bme.mobil_rendszerek.MobSoftApplication;
+import hu.bme.mobil_rendszerek.interactor.orders.OrderItemsInteractor;
+import hu.bme.mobil_rendszerek.interactor.orders.events.GetOrderItemsEvent;
+import hu.bme.mobil_rendszerek.interactor.orders.events.OrderEvent;
+import hu.bme.mobil_rendszerek.interactor.orders.events.SaveOrderItemEvent;
+import hu.bme.mobil_rendszerek.model.OrderItem;
+import hu.bme.mobil_rendszerek.model.User;
 import hu.bme.mobil_rendszerek.ui.Presenter;
 
 /**
@@ -9,10 +22,71 @@ import hu.bme.mobil_rendszerek.ui.Presenter;
  */
 
 public class OrderPresenter extends Presenter<OrderScreen> {
+    @Inject
+    Executor networkExecutor;
+    @Inject
+    OrderItemsInteractor orderItemsInteractor;
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    private User user;
+
     @Override
     public void attachScreen(OrderScreen screen) {
         super.attachScreen(screen);
+        MobSoftApplication.injector.inject(this);
         EventBus.getDefault().register(this);
+    }
+
+    public void refreshOrderItems(final Integer departmentId, final String credential) {
+        networkExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                orderItemsInteractor.getOrderItemsToDepartment(departmentId, credential);
+            }
+        });
+    }
+
+    public void createOrderItem(final OrderItem orderItem, final String credential) {
+        networkExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                orderItemsInteractor.saveOrderItem(orderItem, credential);
+            }
+        });
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEventMainThread(final OrderEvent event) {
+        if (event.getThrowable() != null) {
+            event.getThrowable().printStackTrace();
+            if (screen != null) {
+                screen.showNetworkInformation(event.getMessage());
+                user.setCredential(null);
+            }
+        } else {
+            if (screen != null) {
+                if (event.getCode() == 200 || event.getCode() == 404) {
+                    if (event instanceof GetOrderItemsEvent)
+                        screen.showOrderItems(((GetOrderItemsEvent) event).getOrderItems());
+                    else if (event instanceof SaveOrderItemEvent && event.getCode() == 200) {
+                        screen.showNetworkInformation("Sikeres mentés");
+                    }
+                } else {
+                    if (event.getCredentialToken() == null || event.getCode() == 401){
+                        screen.doLoginFromOffline();
+                        return;
+                    }
+                    screen.showNetworkInformation(event.getMessage());
+                }
+            }
+        }
     }
 
     @Override

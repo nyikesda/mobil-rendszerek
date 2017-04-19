@@ -9,8 +9,8 @@ import java.util.concurrent.Executor;
 import javax.inject.Inject;
 
 import hu.bme.mobil_rendszerek.MobSoftApplication;
+import hu.bme.mobil_rendszerek.interactor.login.LoginEvent;
 import hu.bme.mobil_rendszerek.interactor.login.LoginInteractor;
-import hu.bme.mobil_rendszerek.interactor.login.event.LoginEvent;
 import hu.bme.mobil_rendszerek.ui.Presenter;
 
 /**
@@ -21,11 +21,34 @@ public class MainPresenter extends Presenter<MainScreen> {
 
     @Inject
     Executor networkExecutor;
-
     @Inject
     LoginInteractor loginInteractor;
 
-    public MainPresenter() {
+    public void login(final String username, final String password){
+        networkExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                loginInteractor.login(username,password);
+            }
+        });
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEventMainThread(final LoginEvent event) {
+        if (event.getThrowable() != null) {
+            event.getThrowable().printStackTrace();
+            if (screen != null) {
+                screen.offlineStart(event.getCredential());
+            }
+        } else {
+            if (screen != null) {
+                if (event.getCode() == 200) {
+                    screen.showNextActivityDependsOnPrivilege(event.getUser(),event.getCredential());
+                } else {
+                    screen.showNetworkInformation(event.getMessage());
+                }
+            }
+        }
     }
 
     @Override
@@ -35,33 +58,9 @@ public class MainPresenter extends Presenter<MainScreen> {
         EventBus.getDefault().register(this);
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEventMainThread(final LoginEvent event){
-        if (event.getThrowable() != null) {
-            event.getThrowable().printStackTrace();
-            if (screen != null) {
-                screen.showNetworkError(event.getThrowable().getMessage());
-            }
-        }
-        else {
-            if (screen != null) {
-                screen.showOptionsDependsOnPrivilege(event.getUser());
-            }
-        }
-    }
-
     @Override
     public void detachScreen() {
         EventBus.getDefault().unregister(this);
         super.detachScreen();
-    }
-
-    public void login(final String userName, final String password){
-        networkExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                loginInteractor.login(password, userName);
-            }
-        });
     }
 }

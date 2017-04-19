@@ -9,7 +9,7 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
-import hu.bme.mobil_rendszerek.ui.deparment.DepartmentPresenter;
+import hu.bme.mobil_rendszerek.ui.department.DepartmentPresenter;
 import hu.bme.mobil_rendszerek.ui.main.MainPresenter;
 import hu.bme.mobil_rendszerek.ui.order.OrderPresenter;
 
@@ -51,6 +51,6 @@ public class UIModule {
     @Provides
     @Singleton
     public Executor provideNetworkExecutor() {
-        return Executors.newFixedThreadPool(1);
+        return Executors.newFixedThreadPool(5);
     }
 }
