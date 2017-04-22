@@ -4,7 +4,6 @@ import com.google.gson.annotations.SerializedName;
 import com.orm.SugarRecord;
 
 import java.io.Serializable;
-import java.util.Objects;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -112,55 +111,4 @@ public class User  extends SugarRecord implements Serializable {
     this.credential = credential;
   }
 
-  
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    User user = (User) o;
-    return Objects.equals(username, user.username) &&
-        Objects.equals(privilege, user.privilege) &&
-        Objects.equals(lastName, user.lastName) &&
-        Objects.equals(firstName, user.firstName) &&
-        Objects.equals(departmentId, user.departmentId) &&
-        Objects.equals(userId, user.userId) &&
-        Objects.equals(credential, user.credential);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(username, privilege, lastName, firstName, departmentId, userId, credential);
-  }
-
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class User {\n");
-    
-    sb.append("    username: ").append(toIndentedString(username)).append("\n");
-    sb.append("    privilege: ").append(toIndentedString(privilege)).append("\n");
-    sb.append("    lastName: ").append(toIndentedString(lastName)).append("\n");
-    sb.append("    firstName: ").append(toIndentedString(firstName)).append("\n");
-    sb.append("    departmentId: ").append(toIndentedString(departmentId)).append("\n");
-    sb.append("    userId: ").append(toIndentedString(userId)).append("\n");
-    sb.append("    credential: ").append(toIndentedString(credential)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
-
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
 }
