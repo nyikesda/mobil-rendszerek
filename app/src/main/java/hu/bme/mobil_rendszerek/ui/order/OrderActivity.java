@@ -47,7 +47,6 @@ public class OrderActivity extends AppCompatActivity implements OrderScreen, Ord
     @BindView(R.id.addButton)
     FloatingActionButton fab;
 
-    OrderItemsAdapter orderItemsAdapter;
     CoordinatorLayout coordinatorLayout;
 
 
@@ -139,8 +138,12 @@ public class OrderActivity extends AppCompatActivity implements OrderScreen, Ord
 
         registerForContextMenu(recyclerView);
         recyclerView.setEmptyView(emptyTV);
-        orderItemsAdapter = new OrderItemsAdapter(new ArrayList<OrderItem>(), this, this);
-        recyclerView.setAdapter(orderItemsAdapter);
+
+        if (orderPresenter.getOrderItemsAdapter() == null) {
+            OrderItemsAdapter orderItemsAdapter = new OrderItemsAdapter(new ArrayList<OrderItem>(), this, this);
+            orderPresenter.setOrderItemsAdapter(orderItemsAdapter);
+        }
+        recyclerView.setAdapter(orderPresenter.getOrderItemsAdapter());
 
         coordinatorLayout = (CoordinatorLayout)
                 findViewById(R.id.activity_order);
@@ -158,16 +161,16 @@ public class OrderActivity extends AppCompatActivity implements OrderScreen, Ord
         switch (orderItemOperation) {
             case refresh:
                 swipeContainer.setRefreshing(false);
-                orderItemsAdapter.swap(orderItems);
+                orderPresenter.getOrderItemsAdapter().swap(orderItems);
                 break;
             case newOrderItem:
-                orderItemsAdapter.newOneItem(orderItems.get(0));
+                orderPresenter.getOrderItemsAdapter().newOneItem(orderItems.get(0));
                 break;
             case removeOrderItem:
-                orderItemsAdapter.removeOneItem(orderItems.get(0).getOrderItemId());
+                orderPresenter.getOrderItemsAdapter().removeOneItem(orderItems.get(0).getOrderItemId());
                 break;
             case modifyOrderItem:
-                orderItemsAdapter.modifyOneItem(orderItems.get(0));
+                orderPresenter.getOrderItemsAdapter().modifyOneItem(orderItems.get(0));
                 break;
         }
     }

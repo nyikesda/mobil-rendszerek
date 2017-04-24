@@ -96,6 +96,10 @@ public class MainActivity extends AppCompatActivity implements MainScreen {
 
     @Override
     public void offlineStart(Credential credential) {
+        if (this.credential == null){
+            showNetworkInformation(getString(R.string.server_not_running));
+            return;
+        }
         Integer privilege = sharedPref.getInt(KEY_PRIVILEGE, -1);
         if (credential.getUsername().equals(this.credential.getUsername()) &&
                 credential.getPassword().equals(this.credential.getPassword())) {

@@ -31,6 +31,18 @@ public class OrderPresenter extends Presenter<OrderScreen> {
     @Inject
     OrderItemsInteractor orderItemsInteractor;
 
+    private User user;
+
+    private OrderItemsAdapter orderItemsAdapter;
+
+    public OrderItemsAdapter getOrderItemsAdapter() {
+        return orderItemsAdapter;
+    }
+
+    public void setOrderItemsAdapter(OrderItemsAdapter orderItemsAdapter) {
+        this.orderItemsAdapter = orderItemsAdapter;
+    }
+
     public User getUser() {
         return user;
     }
@@ -38,8 +50,6 @@ public class OrderPresenter extends Presenter<OrderScreen> {
     public void setUser(User user) {
         this.user = user;
     }
-
-    private User user;
 
     @Override
     public void attachScreen(OrderScreen screen) {
