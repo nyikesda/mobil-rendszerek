@@ -43,12 +43,12 @@ public class DepartmentPresenter extends Presenter<DepartmentScreen> {
     public void attachScreen(DepartmentScreen screen) {
         super.attachScreen(screen);
         MobSoftApplication.injector.inject(this);
-        EventBus.getDefault().register(this);
+        if (!EventBus.getDefault().isRegistered(this))
+            EventBus.getDefault().register(this);
     }
 
     @Override
     public void detachScreen() {
-        EventBus.getDefault().unregister(this);
         super.detachScreen();
     }
 

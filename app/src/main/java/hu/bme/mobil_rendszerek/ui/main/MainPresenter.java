@@ -55,12 +55,12 @@ public class MainPresenter extends Presenter<MainScreen> {
     public void attachScreen(MainScreen screen) {
         super.attachScreen(screen);
         MobSoftApplication.injector.inject(this);
-        EventBus.getDefault().register(this);
+        if (!EventBus.getDefault().isRegistered(this))
+            EventBus.getDefault().register(this);
     }
 
     @Override
     public void detachScreen() {
-        EventBus.getDefault().unregister(this);
         super.detachScreen();
     }
 }

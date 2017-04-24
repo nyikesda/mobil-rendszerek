@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.EditText;
 
+import org.greenrobot.eventbus.EventBus;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -83,20 +85,23 @@ public class CreateOrderActivity extends AppCompatActivity implements SensorList
         } else if (orderCount.getText().toString().trim().equals("")) {
             orderCount.setError(getString(R.string.validation_required_product_count));
         } else {
-            Intent intentResult = new Intent();
             if (orderItemToEdit != null) {
                 orderItemToEdit.setProductName(productName.getText().toString());
                 orderItemToEdit.setCost(Integer.parseInt(price.getText().toString()));
                 orderItemToEdit.setCount(Integer.parseInt(orderCount.getText().toString()));
                 orderItemToEdit.setDate(null);
-                intentResult.putExtra(KEY_PRODUCT_FROM_EDIT, orderItemToEdit);
+                ModifyFromOrderCreateActivityEvent me = new ModifyFromOrderCreateActivityEvent();
+                me.setOrderItem(orderItemToEdit);
+                EventBus.getDefault().post(me);
             } else {
+                Intent intentResult = new Intent();
                 intentResult.putExtra(KEY_PRODUCT_NAME, productName.getText());
                 intentResult.putExtra(KEY_PRODUCT_PRICE, price.getText());
                 intentResult.putExtra(KEY_PRODUCT_COUNT, orderCount.getText());
+                setResult(RESULT_OK, intentResult);
             }
-            setResult(RESULT_OK, intentResult);
             finish();
+
         }
     }
 

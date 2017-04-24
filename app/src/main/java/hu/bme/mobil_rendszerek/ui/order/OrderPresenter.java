@@ -4,8 +4,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -55,7 +53,8 @@ public class OrderPresenter extends Presenter<OrderScreen> {
     public void attachScreen(OrderScreen screen) {
         super.attachScreen(screen);
         MobSoftApplication.injector.inject(this);
-        EventBus.getDefault().register(this);
+        if (!EventBus.getDefault().isRegistered(this))
+            EventBus.getDefault().register(this);
     }
 
     public void refreshOrderItems() {
@@ -100,6 +99,11 @@ public class OrderPresenter extends Presenter<OrderScreen> {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEventEditOrderItem(final ModifyFromOrderCreateActivityEvent event){
+        modifyOrderItem(event.getOrderItem());
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEventMainThread(final OrderEvent event) {
         if (event.getThrowable() != null) {
             event.getThrowable().printStackTrace();
@@ -108,52 +112,49 @@ public class OrderPresenter extends Presenter<OrderScreen> {
                 user.setCredential(null);
             }
         } else {
-            if (screen != null) {
-                if (event.getCode() == 200 || event.getCode() == 404) {
-                    if (event instanceof GetOrderItemsEvent)
-                        notifyAdapterOnScreen(OrderItemOperation.refresh,event);
-                    else if (event instanceof ModifyOrderItemEvent)
-                        notifyAdapterOnScreen(OrderItemOperation.modifyOrderItem,event);
-                    else if (event instanceof SaveOrderItemEvent)
-                        notifyAdapterOnScreen(OrderItemOperation.newOrderItem,event);
-                    else if (event instanceof DeleteOrderItemEvent)
-                        notifyAdapterOnScreen(OrderItemOperation.removeOrderItem,event);
-                } else {
-                    if (user.getCredential() == null || event.getCode() == 401) {
-                        screen.doLoginFromOffline();
-                        return;
-                    }
-                    screen.showNetworkInformation(event.getMessage());
+            if (event.getCode() == 200 || event.getCode() == 404) {
+                if (event instanceof GetOrderItemsEvent)
+                    notifyAdapterOnScreen(OrderItemOperation.refresh, event);
+                else if (event instanceof ModifyOrderItemEvent)
+                    notifyAdapterOnScreen(OrderItemOperation.modifyOrderItem, event);
+                else if (event instanceof SaveOrderItemEvent)
+                    notifyAdapterOnScreen(OrderItemOperation.newOrderItem, event);
+                else if (event instanceof DeleteOrderItemEvent)
+                    notifyAdapterOnScreen(OrderItemOperation.removeOrderItem, event);
+            } else if (screen != null){
+                if (user.getCredential() == null || event.getCode() == 401) {
+                    screen.doLoginFromOffline();
+                    return;
                 }
+                screen.showNetworkInformation(event.getMessage());
             }
         }
     }
 
-    private void notifyAdapterOnScreen(OrderItemOperation operation, OrderEvent event){
-        List<OrderItem> orderItems = new ArrayList<>();
+    private void notifyAdapterOnScreen(OrderItemOperation operation, OrderEvent event) {
         switch (operation) {
             case refresh:
-                orderItems = ((GetOrderItemsEvent) event).getOrderItems();
+                orderItemsAdapter.swap(((GetOrderItemsEvent) event).getOrderItems());
+                if (screen != null)
+                    screen.refreshStop();
                 break;
             case newOrderItem:
                 screen.showNetworkInformation("Sikeres mentés");
-                orderItems.add(((SaveOrderItemEvent) event).getOrderItem());
+                orderItemsAdapter.newOneItem(((SaveOrderItemEvent) event).getOrderItem());
                 break;
             case removeOrderItem:
                 screen.showNetworkInformation("Sikeres törlés");
-                orderItems.add(((DeleteOrderItemEvent) event).getOrderItem());
+                orderItemsAdapter.removeOneItem(((DeleteOrderItemEvent) event).getOrderItem().getOrderItemId());
                 break;
             case modifyOrderItem:
                 screen.showNetworkInformation("Sikeres módosítás");
-                orderItems.add(((ModifyOrderItemEvent) event).getOrderItem());
+                orderItemsAdapter.modifyOneItem(((ModifyOrderItemEvent) event).getOrderItem());
                 break;
         }
-        screen.showOrderItems(orderItems, operation);
     }
 
     @Override
     public void detachScreen() {
-        EventBus.getDefault().unregister(this);
         super.detachScreen();
     }
 }

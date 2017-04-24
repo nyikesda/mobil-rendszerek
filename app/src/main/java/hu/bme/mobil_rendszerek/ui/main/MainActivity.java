@@ -134,13 +134,16 @@ public class MainActivity extends AppCompatActivity implements MainScreen {
         if (user.getPrivilege() == Privilege.administrator.getValue()) {
             Intent intent = new Intent(MainActivity.this, DepartmentActivity.class);
             intent.putExtra(OrderActivity.KEY_USER, user);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         } else if (user.getPrivilege() == Privilege.purveyor.getValue()) {
             Intent intent = new Intent(MainActivity.this, OrderActivity.class);
             intent.putExtra(OrderActivity.KEY_USER, user);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         } else {
             showNetworkInformation(getString(R.string.non_administrator_or_purveyor));
         }
+        finish();
     }
 }

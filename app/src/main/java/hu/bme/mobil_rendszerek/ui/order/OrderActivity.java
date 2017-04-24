@@ -13,7 +13,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -26,7 +25,6 @@ import hu.bme.mobil_rendszerek.model.OrderItem;
 import hu.bme.mobil_rendszerek.model.User;
 import hu.bme.mobil_rendszerek.ui.main.MainActivity;
 
-import static hu.bme.mobil_rendszerek.ui.order.CreateOrderActivity.KEY_PRODUCT_FROM_EDIT;
 import static hu.bme.mobil_rendszerek.ui.order.CreateOrderActivity.KEY_PRODUCT_NAME;
 
 public class OrderActivity extends AppCompatActivity implements OrderScreen, OrderItemsAdapter.DeleteListener {
@@ -92,15 +90,11 @@ public class OrderActivity extends AppCompatActivity implements OrderScreen, Ord
             return;
         switch (resultCode) {
             case RESULT_OK:
-                if (data.hasExtra(KEY_PRODUCT_FROM_EDIT)){
-                    orderPresenter.modifyOrderItem((OrderItem) data.getSerializableExtra(KEY_PRODUCT_FROM_EDIT));
-                } else {
                     OrderItem orderItem = new OrderItem();
                     orderItem.setProductName(data.getExtras().get(KEY_PRODUCT_NAME).toString());
                     orderItem.setCount(Integer.parseInt(data.getExtras().get(CreateOrderActivity.KEY_PRODUCT_COUNT).toString()));
                     orderItem.setCost(Integer.parseInt(data.getExtras().get(CreateOrderActivity.KEY_PRODUCT_PRICE).toString()));
                     orderPresenter.createOrderItem(orderItem);
-                }
                 break;
             case RESULT_CANCELED:
                 showNetworkInformation(getString(R.string.no_modification));
@@ -157,22 +151,8 @@ public class OrderActivity extends AppCompatActivity implements OrderScreen, Ord
     }
 
     @Override
-    public void showOrderItems(List<OrderItem> orderItems,OrderItemOperation orderItemOperation) {
-        switch (orderItemOperation) {
-            case refresh:
-                swipeContainer.setRefreshing(false);
-                orderPresenter.getOrderItemsAdapter().swap(orderItems);
-                break;
-            case newOrderItem:
-                orderPresenter.getOrderItemsAdapter().newOneItem(orderItems.get(0));
-                break;
-            case removeOrderItem:
-                orderPresenter.getOrderItemsAdapter().removeOneItem(orderItems.get(0).getOrderItemId());
-                break;
-            case modifyOrderItem:
-                orderPresenter.getOrderItemsAdapter().modifyOneItem(orderItems.get(0));
-                break;
-        }
+    public void refreshStop() {
+        swipeContainer.setRefreshing(false);
     }
 
     @Override

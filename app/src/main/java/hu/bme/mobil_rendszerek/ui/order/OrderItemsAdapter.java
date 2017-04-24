@@ -1,6 +1,5 @@
 package hu.bme.mobil_rendszerek.ui.order;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
@@ -17,8 +16,6 @@ import java.util.List;
 
 import hu.bme.mobil_rendszerek.R;
 import hu.bme.mobil_rendszerek.model.OrderItem;
-
-import static hu.bme.mobil_rendszerek.ui.order.OrderActivity.REQUEST_NEW_ORDER_CODE;
 
 /**
  * Created by nyikes on 2017. 04. 19..
@@ -139,7 +136,7 @@ public class OrderItemsAdapter extends RecyclerView.Adapter<OrderItemsAdapter.Or
                 Intent i = new Intent();
                 i.setClass(mContext, CreateOrderActivity.class);
                 i.putExtra(CreateOrderActivity.KEY_PRODUCT_FROM_EDIT, selectedItem);
-                ((Activity)mContext).startActivityForResult(i, REQUEST_NEW_ORDER_CODE);
+                mContext.startActivity(i);
             } else {
                 return false;
             }
