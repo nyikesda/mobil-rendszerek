@@ -34,10 +34,29 @@ public class SugarORMRepository implements Repository {
     }
 
     @Override
-    public void updateOrderItems(List<OrderItem> orderItems, Integer departmentId) {
+    public void syncOrderItems(List<OrderItem> orderItems, Integer departmentId) {
         List<OrderItem> orderItemsOld = getOrderItems(departmentId);
         for (OrderItem item : orderItemsOld)
             SugarRecord.delete(item);
         SugarRecord.saveInTx(orderItems);
+    }
+
+    @Override
+    public void addnewOrderItem(OrderItem orderItem) {
+        SugarRecord.save(orderItem);
+    }
+
+    @Override
+    public void modifyOrderItem(OrderItem orderItem) {
+        deleteOrderItem(orderItem.getOrderItemId());
+        addnewOrderItem(orderItem);
+    }
+
+    @Override
+    public void deleteOrderItem(Integer orderItemId) {
+        OrderItem oldItem = Select.from(OrderItem.class)
+                .where(Condition.prop("order_item_id").eq(orderItemId))
+                .first();
+        SugarRecord.delete(oldItem);
     }
 }

@@ -8,15 +8,6 @@ public class BaseEvent {
     private int code;
     private Throwable throwable;
     private String message;
-    private String credentialToken;
-
-    public String getCredentialToken() {
-        return credentialToken;
-    }
-
-    public void setCredentialToken(String credentialToken) {
-        this.credentialToken = credentialToken;
-    }
 
     public String getMessage() {
         return message;

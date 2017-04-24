@@ -4,13 +4,17 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
 import hu.bme.mobil_rendszerek.MobSoftApplication;
 import hu.bme.mobil_rendszerek.interactor.orders.OrderItemsInteractor;
+import hu.bme.mobil_rendszerek.interactor.orders.events.DeleteOrderItemEvent;
 import hu.bme.mobil_rendszerek.interactor.orders.events.GetOrderItemsEvent;
+import hu.bme.mobil_rendszerek.interactor.orders.events.ModifyOrderItemEvent;
 import hu.bme.mobil_rendszerek.interactor.orders.events.OrderEvent;
 import hu.bme.mobil_rendszerek.interactor.orders.events.SaveOrderItemEvent;
 import hu.bme.mobil_rendszerek.model.OrderItem;
@@ -44,7 +48,9 @@ public class OrderPresenter extends Presenter<OrderScreen> {
         EventBus.getDefault().register(this);
     }
 
-    public void refreshOrderItems(final Integer departmentId, final String credential) {
+    public void refreshOrderItems() {
+        final Integer departmentId = user.getDepartmentId();
+        final String credential = user.getCredential();
         networkExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -53,11 +59,32 @@ public class OrderPresenter extends Presenter<OrderScreen> {
         });
     }
 
-    public void createOrderItem(final OrderItem orderItem, final String credential) {
+    public void createOrderItem(final OrderItem orderItem) {
+        final String credential = user.getCredential();
         networkExecutor.execute(new Runnable() {
             @Override
             public void run() {
                 orderItemsInteractor.saveOrderItem(orderItem, credential);
+            }
+        });
+    }
+
+    public void deleteOrderItem(final OrderItem orderItem) {
+        final String credential = user.getCredential();
+        networkExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                orderItemsInteractor.deleteOrderItem(orderItem, credential);
+            }
+        });
+    }
+
+    public void modifyOrderItem(final OrderItem orderItem) {
+        final String credential = user.getCredential();
+        networkExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                orderItemsInteractor.modifyOrderItem(orderItem, credential);
             }
         });
     }
@@ -74,12 +101,15 @@ public class OrderPresenter extends Presenter<OrderScreen> {
             if (screen != null) {
                 if (event.getCode() == 200 || event.getCode() == 404) {
                     if (event instanceof GetOrderItemsEvent)
-                        screen.showOrderItems(((GetOrderItemsEvent) event).getOrderItems());
-                    else if (event instanceof SaveOrderItemEvent && event.getCode() == 200) {
-                        screen.showNetworkInformation("Sikeres mentés");
-                    }
+                        notifyAdapterOnScreen(OrderItemOperation.refresh,event);
+                    else if (event instanceof ModifyOrderItemEvent)
+                        notifyAdapterOnScreen(OrderItemOperation.modifyOrderItem,event);
+                    else if (event instanceof SaveOrderItemEvent)
+                        notifyAdapterOnScreen(OrderItemOperation.newOrderItem,event);
+                    else if (event instanceof DeleteOrderItemEvent)
+                        notifyAdapterOnScreen(OrderItemOperation.removeOrderItem,event);
                 } else {
-                    if (event.getCredentialToken() == null || event.getCode() == 401){
+                    if (user.getCredential() == null || event.getCode() == 401) {
                         screen.doLoginFromOffline();
                         return;
                     }
@@ -87,6 +117,28 @@ public class OrderPresenter extends Presenter<OrderScreen> {
                 }
             }
         }
+    }
+
+    private void notifyAdapterOnScreen(OrderItemOperation operation, OrderEvent event){
+        List<OrderItem> orderItems = new ArrayList<>();
+        switch (operation) {
+            case refresh:
+                orderItems = ((GetOrderItemsEvent) event).getOrderItems();
+                break;
+            case newOrderItem:
+                screen.showNetworkInformation("Sikeres mentés");
+                orderItems.add(((SaveOrderItemEvent) event).getOrderItem());
+                break;
+            case removeOrderItem:
+                screen.showNetworkInformation("Sikeres törlés");
+                orderItems.add(((DeleteOrderItemEvent) event).getOrderItem());
+                break;
+            case modifyOrderItem:
+                screen.showNetworkInformation("Sikeres módosítás");
+                orderItems.add(((ModifyOrderItemEvent) event).getOrderItem());
+                break;
+        }
+        screen.showOrderItems(orderItems, operation);
     }
 
     @Override

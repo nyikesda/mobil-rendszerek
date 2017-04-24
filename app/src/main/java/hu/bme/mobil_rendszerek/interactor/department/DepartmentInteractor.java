@@ -30,7 +30,6 @@ public class DepartmentInteractor {
     public void getUsers(String credential){
         Call<List<User>> usersQueryCall = networkAPI.usersFindByDepartmentId(credential);
         DepartmentUserEvent event = new DepartmentUserEvent();
-        event.setCredentialToken(credential);
         try {
             Response<List<User>> response = usersQueryCall.execute();
             switch (response.code()) {
@@ -50,7 +49,6 @@ public class DepartmentInteractor {
     public void saveNewDepartment(String credential, List<Integer> userIds, Department department){
         Call<Void> addNewDeparment = networkAPI.departmentCreate(userIds,credential,department);
         SaveNewDepartmentEvent event = new SaveNewDepartmentEvent();
-        event.setCredentialToken(credential);
         try {
             Response<Void> response = addNewDeparment.execute();
             switch (response.code()) {

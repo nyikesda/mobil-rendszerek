@@ -12,12 +12,14 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import hu.bme.mobil_rendszerek.R;
+import hu.bme.mobil_rendszerek.model.OrderItem;
 
 public class CreateOrderActivity extends AppCompatActivity implements SensorListener {
 
     public static final String KEY_PRODUCT_NAME = "KEY_PRODUCT_NAME";
     public static final String KEY_PRODUCT_PRICE = "KEY_PRODUCT_PRICE";
     public static final String KEY_PRODUCT_COUNT = "KEY_PRODUCT_COUNT";
+    public static final String KEY_PRODUCT_FROM_EDIT = "KEY_PRODUCT_FROM_EDIT";
 
     @BindView(R.id.productName)
     EditText productName;
@@ -25,6 +27,8 @@ public class CreateOrderActivity extends AppCompatActivity implements SensorList
     EditText price;
     @BindView(R.id.orderCount)
     EditText orderCount;
+
+    private OrderItem orderItemToEdit;
 
     //http://stackoverflow.com/questions/5271448/how-to-detect-shake-event-with-android
     private static final int FORCE_THRESHOLD = 350;
@@ -53,6 +57,15 @@ public class CreateOrderActivity extends AppCompatActivity implements SensorList
         super.onResume();
         mSensorMgr = (SensorManager)this.getSystemService(Context.SENSOR_SERVICE);
         mSensorMgr.registerListener(this, SensorManager.SENSOR_ACCELEROMETER, SensorManager.SENSOR_DELAY_GAME);
+        if (getIntent().getExtras() != null && getIntent().hasExtra(KEY_PRODUCT_FROM_EDIT)){
+            orderItemToEdit = (OrderItem) getIntent().getSerializableExtra(KEY_PRODUCT_FROM_EDIT);
+            productName.setText(orderItemToEdit.getProductName());
+            price.setText(orderItemToEdit.getCost().toString());
+            orderCount.setText(orderItemToEdit.getCount().toString());
+            getIntent().removeExtra(KEY_PRODUCT_FROM_EDIT);
+        } else {
+            orderItemToEdit = null;
+        }
     }
 
     @Override
@@ -71,9 +84,17 @@ public class CreateOrderActivity extends AppCompatActivity implements SensorList
             orderCount.setError(getString(R.string.validation_required_product_count));
         } else {
             Intent intentResult = new Intent();
-            intentResult.putExtra(KEY_PRODUCT_NAME, productName.getText());
-            intentResult.putExtra(KEY_PRODUCT_PRICE, price.getText());
-            intentResult.putExtra(KEY_PRODUCT_COUNT, orderCount.getText());
+            if (orderItemToEdit != null) {
+                orderItemToEdit.setProductName(productName.getText().toString());
+                orderItemToEdit.setCost(Integer.parseInt(price.getText().toString()));
+                orderItemToEdit.setCount(Integer.parseInt(orderCount.getText().toString()));
+                orderItemToEdit.setDate(null);
+                intentResult.putExtra(KEY_PRODUCT_FROM_EDIT, orderItemToEdit);
+            } else {
+                intentResult.putExtra(KEY_PRODUCT_NAME, productName.getText());
+                intentResult.putExtra(KEY_PRODUCT_PRICE, price.getText());
+                intentResult.putExtra(KEY_PRODUCT_COUNT, orderCount.getText());
+            }
             setResult(RESULT_OK, intentResult);
             finish();
         }

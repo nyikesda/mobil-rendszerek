@@ -10,6 +10,6 @@ import hu.bme.mobil_rendszerek.model.OrderItem;
 
 public interface OrderScreen {
     void showNetworkInformation(String message);
-    void showOrderItems(List<OrderItem> orderItems);
+    void showOrderItems(List<OrderItem> orderItems, OrderItemOperation orderItemOperation);
     void doLoginFromOffline();
 }

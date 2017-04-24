@@ -26,9 +26,10 @@ import hu.bme.mobil_rendszerek.model.OrderItem;
 import hu.bme.mobil_rendszerek.model.User;
 import hu.bme.mobil_rendszerek.ui.main.MainActivity;
 
+import static hu.bme.mobil_rendszerek.ui.order.CreateOrderActivity.KEY_PRODUCT_FROM_EDIT;
 import static hu.bme.mobil_rendszerek.ui.order.CreateOrderActivity.KEY_PRODUCT_NAME;
 
-public class OrderActivity extends AppCompatActivity implements OrderScreen {
+public class OrderActivity extends AppCompatActivity implements OrderScreen, OrderItemsAdapter.DeleteListener {
 
     public static final int REQUEST_NEW_ORDER_CODE = 100;
     public static final String KEY_USER = "KEY_USER";
@@ -54,9 +55,9 @@ public class OrderActivity extends AppCompatActivity implements OrderScreen {
     protected void onResume() {
         super.onResume();
         orderPresenter.attachScreen(this);
-        orderPresenter.refreshOrderItems(orderPresenter.getUser().getDepartmentId(), orderPresenter.getUser().getCredential());
         if (getIntent().hasExtra(KEY_USER)){
             showNetworkInformation(getString(R.string.login)+" "+orderPresenter.getUser().getLastName() + " " + orderPresenter.getUser().getFirstName());
+            orderPresenter.refreshOrderItems();
             getIntent().removeExtra(KEY_USER);
         }
     }
@@ -74,7 +75,7 @@ public class OrderActivity extends AppCompatActivity implements OrderScreen {
                         "create");
         Intent i = new Intent();
         i.setClass(this, CreateOrderActivity.class);
-        startActivityForResult(i, REQUEST_NEW_ORDER_CODE, options.toBundle());
+            startActivityForResult(i, REQUEST_NEW_ORDER_CODE, options.toBundle());
     }
 
     @OnClick(R.id.logout)
@@ -92,14 +93,18 @@ public class OrderActivity extends AppCompatActivity implements OrderScreen {
             return;
         switch (resultCode) {
             case RESULT_OK:
-                OrderItem orderItem = new OrderItem();
-                orderItem.setDepartmentId(0);
-                orderItem.setOrderItemId(0);
-                orderItem.setProductName(data.getExtras().get(KEY_PRODUCT_NAME).toString());
-                orderItem.setCount(Integer.parseInt(data.getExtras().get(CreateOrderActivity.KEY_PRODUCT_COUNT).toString()));
-                orderItem.setCost(Integer.parseInt(data.getExtras().get(CreateOrderActivity.KEY_PRODUCT_PRICE).toString()));
-                orderPresenter.createOrderItem(orderItem, orderPresenter.getUser().getCredential());
+                if (data.hasExtra(KEY_PRODUCT_FROM_EDIT)){
+                    orderPresenter.modifyOrderItem((OrderItem) data.getSerializableExtra(KEY_PRODUCT_FROM_EDIT));
+                } else {
+                    OrderItem orderItem = new OrderItem();
+                    orderItem.setProductName(data.getExtras().get(KEY_PRODUCT_NAME).toString());
+                    orderItem.setCount(Integer.parseInt(data.getExtras().get(CreateOrderActivity.KEY_PRODUCT_COUNT).toString()));
+                    orderItem.setCost(Integer.parseInt(data.getExtras().get(CreateOrderActivity.KEY_PRODUCT_PRICE).toString()));
+                    orderPresenter.createOrderItem(orderItem);
+                }
                 break;
+            case RESULT_CANCELED:
+                showNetworkInformation(getString(R.string.no_modification));
         }
     }
 
@@ -119,29 +124,27 @@ public class OrderActivity extends AppCompatActivity implements OrderScreen {
         setSupportActionBar(toolbar);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        User user = null;
         if (getIntent().hasExtra(KEY_USER)){
-            user = (User) getIntent().getSerializableExtra(KEY_USER);
+            User user = (User) getIntent().getSerializableExtra(KEY_USER);
             orderPresenter.setUser(user);
-        } else {
-            user = orderPresenter.getUser();
+            toolbar.setTitle(toolbar.getTitle()+(user.getUserId() == null ? " (Offline)" : " (Online)"));
         }
 
-        final User finalUser = user;
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                orderPresenter.refreshOrderItems(finalUser.getDepartmentId(), finalUser.getCredential());
+                orderPresenter.refreshOrderItems();
             }
         });
 
         registerForContextMenu(recyclerView);
         recyclerView.setEmptyView(emptyTV);
+        orderItemsAdapter = new OrderItemsAdapter(new ArrayList<OrderItem>(), this, this);
+        recyclerView.setAdapter(orderItemsAdapter);
 
         coordinatorLayout = (CoordinatorLayout)
                 findViewById(R.id.activity_order);
 
-        toolbar.setTitle(toolbar.getTitle()+(user.getUserId() == null ? " (Offline)" : " (Online)"));
     }
 
     @Override
@@ -151,10 +154,22 @@ public class OrderActivity extends AppCompatActivity implements OrderScreen {
     }
 
     @Override
-    public void showOrderItems(List<OrderItem> orderItems) {
-        swipeContainer.setRefreshing(false);
-        orderItemsAdapter = new OrderItemsAdapter(orderItems == null ? new ArrayList<OrderItem>() : orderItems, this);
-        recyclerView.setAdapter(orderItemsAdapter);
+    public void showOrderItems(List<OrderItem> orderItems,OrderItemOperation orderItemOperation) {
+        switch (orderItemOperation) {
+            case refresh:
+                swipeContainer.setRefreshing(false);
+                orderItemsAdapter.swap(orderItems);
+                break;
+            case newOrderItem:
+                orderItemsAdapter.newOneItem(orderItems.get(0));
+                break;
+            case removeOrderItem:
+                orderItemsAdapter.removeOneItem(orderItems.get(0).getOrderItemId());
+                break;
+            case modifyOrderItem:
+                orderItemsAdapter.modifyOneItem(orderItems.get(0));
+                break;
+        }
     }
 
     @Override
@@ -164,4 +179,8 @@ public class OrderActivity extends AppCompatActivity implements OrderScreen {
         startActivity(i);
     }
 
+    @Override
+    public void onDeleted(OrderItem orderItem) {
+        orderPresenter.deleteOrderItem(orderItem);
+    }
 }

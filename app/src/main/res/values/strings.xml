@@ -31,4 +31,5 @@
     <string name="spinner_elem_count_text">elem van kiválasztva</string>
     <string name="login_offline_failed">Nincs elmentve ilyen belépése</string>
     <string name="empty_list_purveyor">Nincs kijelölhető beszerző</string>
+    <string name="no_modification">Nincs módosítás</string>
 </resources>

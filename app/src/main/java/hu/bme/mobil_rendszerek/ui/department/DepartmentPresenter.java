@@ -72,7 +72,7 @@ public class DepartmentPresenter extends Presenter<DepartmentScreen> {
                         screen.clear();
                     }
                 } else {
-                    if (event.getCredentialToken() == null || event.getCode() == 401) {
+                    if (user.getCredential() == null || event.getCode() == 401) {
                         selectedUsers = null;
                         screen.doLoginFromOffline();
                         return;

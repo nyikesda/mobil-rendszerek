@@ -40,7 +40,29 @@ public class MemoryRepository implements Repository {
     }
 
     @Override
-    public void updateOrderItems(List<OrderItem> orderItems,Integer departmentId) {
-        this.orderItems = orderItems;
+    public void syncOrderItems(List<OrderItem> orderItems,Integer departmentId) {
+        MemoryRepository.orderItems = orderItems;
+    }
+
+    @Override
+    public void addnewOrderItem(OrderItem orderItem) {
+        orderItems.add(orderItem);
+    }
+
+    @Override
+    public void modifyOrderItem(OrderItem orderItem) {
+        deleteOrderItem(orderItem.getOrderItemId());
+        addnewOrderItem(orderItem);
+    }
+
+    @Override
+    public void deleteOrderItem(Integer orderItemId) {
+        OrderItem oldItem = null;
+        for (OrderItem o : orderItems)
+            if (o.getOrderItemId().equals(orderItemId)){
+                oldItem = o;
+                break;
+            }
+        orderItems.remove(oldItem);
     }
 }

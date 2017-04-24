@@ -14,5 +14,8 @@ public interface Repository {
     void open(Context context);
     void close();
     List<OrderItem> getOrderItems(Integer departmentId);
-    void updateOrderItems(List<OrderItem> orderItems,Integer departmentId);
+    void syncOrderItems(List<OrderItem> orderItems,Integer departmentId);
+    void addnewOrderItem(OrderItem orderItem);
+    void modifyOrderItem(OrderItem orderItem);
+    void deleteOrderItem(Integer orderItemId);
 }
