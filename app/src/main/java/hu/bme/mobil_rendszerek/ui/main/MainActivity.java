@@ -9,6 +9,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 
+import com.crashlytics.android.Crashlytics;
+
 import javax.inject.Inject;
 
 import butterknife.BindView;
@@ -21,6 +23,7 @@ import hu.bme.mobil_rendszerek.model.User;
 import hu.bme.mobil_rendszerek.network.Privilege;
 import hu.bme.mobil_rendszerek.ui.department.DepartmentActivity;
 import hu.bme.mobil_rendszerek.ui.order.OrderActivity;
+import io.fabric.sdk.android.Fabric;
 
 public class MainActivity extends AppCompatActivity implements MainScreen {
     public static final String KEY_LOGOUT = "KEY_LOGOUT";
@@ -45,6 +48,7 @@ public class MainActivity extends AppCompatActivity implements MainScreen {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_main);
         main = (RelativeLayout) findViewById(R.id.activity_main);
         ButterKnife.bind(this);

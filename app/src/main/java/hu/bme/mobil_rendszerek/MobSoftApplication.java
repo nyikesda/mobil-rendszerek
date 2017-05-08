@@ -12,6 +12,8 @@ import hu.bme.mobil_rendszerek.ui.UIModule;
  */
 
 public class MobSoftApplication extends SugarApp {
+
+
     public static MobSoftApplicationComponent injector;
     @Inject
     Repository repository;
@@ -25,6 +27,12 @@ public class MobSoftApplication extends SugarApp {
                         uIModule(
                                 new UIModule(this)
                         ).build();
+        injector.inject(this);
+        repository.open(getApplicationContext());
+    }
+
+    public void setInjector(MobSoftApplicationComponent injector) {
+        MobSoftApplication.injector = injector;
         injector.inject(this);
         repository.open(getApplicationContext());
     }

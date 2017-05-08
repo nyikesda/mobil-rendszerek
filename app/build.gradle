@@ -1,4 +1,25 @@
+
+buildscript {
+    repositories {
+        maven { url 'https://maven.fabric.io/public' }
+    }
+
+    dependencies {
+        // These docs use an open ended version so that our plugin
+        // can be updated quickly in response to Android tooling updates
+
+        // We recommend changing it to the latest version from our changelog:
+        // https://docs.fabric.io/android/changelog.html#fabric-gradle-plugin
+        classpath 'io.fabric.tools:gradle:1.+'
+    }
+}
+
 apply plugin: 'com.android.application'
+apply plugin: 'io.fabric'
+
+repositories {
+    maven { url 'https://maven.fabric.io/public' }
+}
 
 android {
     compileSdkVersion 25
@@ -18,8 +39,16 @@ android {
         }
     }
 }
-
+configurations.all {
+    resolutionStrategy {
+        force 'com.google.guava:guava:20.0'
+    }
+}
 dependencies {
+    compile('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
+        transitive = true;
+    }
+
     //butterknife
     compile 'com.jakewharton:butterknife:8.4.0'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.4.0'
@@ -60,4 +89,12 @@ dependencies {
     })
     compile 'com.android.support:appcompat-v7:25.1.1'
     testCompile 'junit:junit:4.12'
+
+    //Robolectric
+    testCompile "org.robolectric:robolectric:3.3.2"
+
+    //Mockitoe
+    testCompile 'org.mockito:mockito-core:1.10.19'
+
+    testAnnotationProcessor  'com.google.dagger:dagger-compiler:2.5'
 }

@@ -49,6 +49,8 @@ public class MockData {
         return "";
     }
 
+
+
     private void createDepartments() {
         departments = new ArrayList<>();
         Department d = new Department();
@@ -80,5 +82,22 @@ public class MockData {
 
     private void createMockOrderItems(){
         orderItems = new ArrayList<>();
+        OrderItem orderItem = new OrderItem();
+        orderItem.setDepartmentId(departmentId);
+        orderItem.setProductName("Törlendő");
+        orderItem.setCost(500);
+        orderItem.setCount(10);
+        orderItem.setOrderItemId(orderItemId++);
+        orderItems.add(orderItem);
+
+        orderItem = new OrderItem();
+        orderItem.setDepartmentId(departmentId);
+        orderItem.setProductName("Módosítandó");
+        orderItem.setCost(500);
+        orderItem.setCount(10);
+        orderItem.setOrderItemId(orderItemId++);
+        orderItems.add(orderItem);
     }
+
+
 }

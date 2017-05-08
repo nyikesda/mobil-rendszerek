@@ -44,6 +44,10 @@
             android:name=".ui.order.CreateOrderActivity"
             android:label="Új költség">
         </activity>
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="631c16e1622d94a2a65a944cf0d778126fc26be8"
+            />
     </application>
 
 </manifest>
