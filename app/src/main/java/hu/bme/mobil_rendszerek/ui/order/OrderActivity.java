@@ -12,6 +12,10 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
+import com.crashlytics.android.Crashlytics;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
+
 import java.util.ArrayList;
 
 import javax.inject.Inject;
@@ -24,6 +28,7 @@ import hu.bme.mobil_rendszerek.R;
 import hu.bme.mobil_rendszerek.model.OrderItem;
 import hu.bme.mobil_rendszerek.model.User;
 import hu.bme.mobil_rendszerek.ui.main.MainActivity;
+import io.fabric.sdk.android.Fabric;
 
 import static hu.bme.mobil_rendszerek.ui.order.CreateOrderActivity.KEY_PRODUCT_NAME;
 
@@ -32,6 +37,8 @@ public class OrderActivity extends AppCompatActivity implements OrderScreen, Ord
     public static final int REQUEST_NEW_ORDER_CODE = 100;
     public static final String KEY_USER = "KEY_USER";
 
+    @Inject
+    Tracker mTracker;
     @Inject
     OrderPresenter orderPresenter;
     @BindView(R.id.toolbar)
@@ -65,6 +72,11 @@ public class OrderActivity extends AppCompatActivity implements OrderScreen, Ord
             showNetworkInformation(getString(R.string.offline_have_to_refresh));
             return;
         }
+        mTracker.send(new HitBuilders.EventBuilder()
+                .setCategory("OrderItem")
+                .setAction("Create")
+                .setValue(1)
+                .build());
         ActivityOptionsCompat options =
                 ActivityOptionsCompat.makeSceneTransitionAnimation(
                         OrderActivity.this,
@@ -113,6 +125,7 @@ public class OrderActivity extends AppCompatActivity implements OrderScreen, Ord
         setContentView(R.layout.activity_order);
         MobSoftApplication.injector.inject(this);
         ButterKnife.bind(this);
+        Fabric.with(this, new Crashlytics());
 
         setSupportActionBar(toolbar);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -164,6 +177,11 @@ public class OrderActivity extends AppCompatActivity implements OrderScreen, Ord
 
     @Override
     public void onDeleted(OrderItem orderItem) {
+        mTracker.send(new HitBuilders.EventBuilder()
+                .setCategory("OrderItem")
+                .setAction("Delete")
+                .setValue(1)
+                .build());
         orderPresenter.deleteOrderItem(orderItem);
     }
 }

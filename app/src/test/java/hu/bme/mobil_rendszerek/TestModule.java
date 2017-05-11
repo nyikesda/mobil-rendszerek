@@ -5,6 +5,8 @@ import android.content.Context;
 import java.util.concurrent.Executor;
 
 import javax.inject.Singleton;
+import com.google.android.gms.analytics.GoogleAnalytics;
+import com.google.android.gms.analytics.Tracker;
 
 import dagger.Module;
 import dagger.Provides;
@@ -48,6 +50,11 @@ public class TestModule {
 	@Singleton
 	public Executor provideNetworkExecutor() {
 		return new UiExecutor();
+	}
+
+	@Provides
+	public Tracker provideTracker() {
+		return UIModule.provideTracker();
 	}
 
 

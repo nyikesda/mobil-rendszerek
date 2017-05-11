@@ -7,6 +7,10 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.EditText;
 
+import com.crashlytics.android.Crashlytics;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,11 +24,14 @@ import hu.bme.mobil_rendszerek.R;
 import hu.bme.mobil_rendszerek.model.Department;
 import hu.bme.mobil_rendszerek.model.User;
 import hu.bme.mobil_rendszerek.ui.main.MainActivity;
+import io.fabric.sdk.android.Fabric;
 
 import static hu.bme.mobil_rendszerek.ui.order.OrderActivity.KEY_USER;
 
 public class DepartmentActivity extends AppCompatActivity implements DepartmentScreen, MultiSpinner.MultiSpinnerListener {
 
+    @Inject
+    Tracker mTracker;
     @Inject
     DepartmentPresenter departmentPresenter;
 
@@ -97,6 +104,7 @@ public class DepartmentActivity extends AppCompatActivity implements DepartmentS
         setContentView(R.layout.activity_department);
         MobSoftApplication.injector.inject(this);
         ButterKnife.bind(this);
+        Fabric.with(this, new Crashlytics());
         coordinatorLayout = (CoordinatorLayout)
                 findViewById(R.id.activity_department);
 
@@ -131,6 +139,11 @@ public class DepartmentActivity extends AppCompatActivity implements DepartmentS
         } else if (departmentPresenter.getSelectedUsers() == null) {
             showNetworkInformation(getString(R.string.validation_required_department_worker));
         } else {
+            mTracker.send(new HitBuilders.EventBuilder()
+                    .setCategory("Department")
+                    .setAction("Create")
+                    .setValue(1)
+                    .build());
             d.setMonthlyQuota(Integer.parseInt(monthlyQuota.getText().toString()));
             d.setName(departmentName.getText().toString());
             for (int i = 0; i < departmentPresenter.getSelectedUsers().length; i++)

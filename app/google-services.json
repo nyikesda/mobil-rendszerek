@@ -1,0 +1,38 @@
+{
+  "project_info": {
+    "project_number": "389978974874",
+    "project_id": "mobil-rendszerek"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:389978974874:android:9d7df120311a62ac",
+        "android_client_info": {
+          "package_name": "hu.bme.mobil_rendszerek"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBB91NHsAlAGeqru3hBZ38i9MS4505G2YE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 2,
+          "analytics_property": {
+            "tracking_id": "UA-98759877-1"
+          }
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

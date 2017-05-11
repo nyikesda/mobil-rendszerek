@@ -10,6 +10,8 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 
 import javax.inject.Inject;
 
@@ -34,6 +36,8 @@ public class MainActivity extends AppCompatActivity implements MainScreen {
     public static final String KEY_LASTNAME = "lastName";
     public static final String KEY_FIRSTNAME = "firstName";
 
+    @Inject
+    Tracker mTracker;
     @Inject
     MainPresenter mainPresenter;
     @BindView(R.id.username)
@@ -69,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements MainScreen {
     protected void onResume() {
         super.onResume();
         mainPresenter.attachScreen(this);
+
         if (getIntent().getExtras() != null && getIntent().getExtras().getBoolean(KEY_LOGOUT)) {
             SharedPreferences.Editor editor = sharedPref.edit();
             editor.clear();
@@ -121,33 +126,48 @@ public class MainActivity extends AppCompatActivity implements MainScreen {
 
     @Override
     public void showNextActivityDependsOnPrivilege(User user, Credential credential) {
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString(KEY_USERNAME, credential.getUsername());
-        editor.putString(KEY_PASSWORD, credential.getPassword());
-        editor.putInt(KEY_PRIVILEGE, user.getPrivilege());
-        if (user.getDepartmentId() != null)
+
+        if (user.getDepartmentId() != null){
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putString(KEY_USERNAME, credential.getUsername());
+            editor.putString(KEY_PASSWORD, credential.getPassword());
+            editor.putInt(KEY_PRIVILEGE, user.getPrivilege());
             editor.putInt(KEY_DEPARTMENTID, user.getDepartmentId());
-        editor.putString(KEY_LASTNAME, user.getLastName());
-        editor.putString(KEY_FIRSTNAME, user.getFirstName());
-        editor.commit();
+            editor.putString(KEY_LASTNAME, user.getLastName());
+            editor.putString(KEY_FIRSTNAME, user.getFirstName());
+            editor.commit();
+        }
+
         if (user.getUserId() == null && user.getPrivilege() == Privilege.administrator.getValue()) {
             showNetworkInformation(getString(R.string.offline_mode_text));
             return;
         }
 
         if (user.getPrivilege() == Privilege.administrator.getValue()) {
+            mTracker.send(new HitBuilders.EventBuilder()
+                    .setCategory("Start")
+                    .setAction("Department screen start")
+                    .setValue(1)
+                    .build());
             Intent intent = new Intent(MainActivity.this, DepartmentActivity.class);
             intent.putExtra(OrderActivity.KEY_USER, user);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
+            finish();
         } else if (user.getPrivilege() == Privilege.purveyor.getValue()) {
+            mTracker.send(new HitBuilders.EventBuilder()
+                    .setCategory("Start")
+                    .setAction("Order screen start")
+                    .setValue(1)
+                    .build());
             Intent intent = new Intent(MainActivity.this, OrderActivity.class);
             intent.putExtra(OrderActivity.KEY_USER, user);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
+            finish();
         } else {
             showNetworkInformation(getString(R.string.non_administrator_or_purveyor));
         }
-        finish();
+
     }
 }
